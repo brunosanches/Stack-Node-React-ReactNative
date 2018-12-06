@@ -1,0 +1,15 @@
+Preparar ambiente com nodemon, eslint, mongo, monggose, jwt
+Estrutura de pastas:
+src
+  app
+    constroller
+      SessionController.js
+      UserController.js
+    models
+      User
+  config
+    database.js
+  index.js
+  routes.js
+  server.js
+  .editorconfig

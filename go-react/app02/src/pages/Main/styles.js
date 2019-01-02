@@ -4,7 +4,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 60px;
+  margin-top: 60px;
 `
 
 export const Form = styled.form`
@@ -18,24 +18,26 @@ export const Form = styled.form`
     height: 55px;
     padding: 0 20px;
     border: 0;
-    font-size: 18px;
-    color: #444;
     border-radius: 3px;
+    font-size: #444;
+
+    border: ${props => (props.withError ? '2px solid #F00' : 0)};
   }
   button {
-    width: 80px;
     height: 55px;
+    width: 80px;
     padding: 0 20px;
     margin-left: 10px;
-    background: #63f5b8;
+    background: #63f5b0;
     color: #fff;
     border: 0;
     border-radius: 3px;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: bold;
+    cursor: pointer;
 
     &:hover {
-      background: #52d89f;
+      background: #42bd83;
     }
   }
 `

@@ -11,88 +11,87 @@ export default class Main extends Component {
   constructor (props) {
     super(props)
 
-    if (!localStorage.getItem('@GithubCompare:Repositories')) {
-      localStorage.setItem('@GithubCompare:Repositories', '[]')
-    }
-
     this.state = {
       loading: false,
       repositoryInput: '',
       repositoryError: false,
-      repositories: JSON.parse(
-        localStorage.getItem('@GithubCompare:Repositories')
-      )
+      repositories: []
     }
+  }
+
+  async componentDidMount () {
+    this.setState({ repositories: await this.getLocalRepositories() })
+  }
+
+  getLocalRepositories = async () =>
+    JSON.parse(await localStorage.getItem('@GithubCompare:Repositories')) || []
+
+  setLocalRepositories = async () => {
+    await localStorage.setItem(
+      '@GithubCompare:Repositories',
+      JSON.stringify(this.state.repositories)
+    )
   }
 
   getRepository = async (id, repositoryName) => {
-    try {
-      const { data: repository } = await api.get(`repos/${repositoryName}`)
-
-      repository.lastCommit = moment(repository.pushed_at).fromNow()
-
-      let repositories = JSON.parse(
-        localStorage.getItem('@GithubCompare:Repositories')
-      )
-
-      if (
-        repositories.filter(repo => String(repo.id) === String(id)).length === 1
-      ) {
-      } else {
+    // Check if input empyt
+    if (typeof id === 'undefined') {
+      if (this.state.repositoryInput === '') {
         this.setState({
-          repositoryInput: '',
-          repositoryError: false,
-          repositories: [...this.state.repositories, repository]
+          repositoryError: true
         })
-
-        localStorage.setItem(
-          '@GithubCompare:Repositories',
-          JSON.stringify(this.state.repositories)
-        )
+        return false
       }
-    } catch (error) {
-      this.setState({
-        repositoryError: true,
-        repositoryInput: ''
-      })
-    } finally {
-      this.setState({ loading: false })
-    }
-  }
-
-  onHandleRefresh = async e => {
-    this.getRepository(e.target.dataset.id, e.target.dataset.repository)
-  }
-
-  handleAddRepository = async e => {
-    e.preventDefault()
-
-    if (this.state.repositoryInput === '') {
-      this.setState({
-        repositoryError: true
-      })
-      return false
     }
 
+    // init icon loading
     this.setState({ loading: true })
 
+    // init get data in api
     try {
-      const { data: repository } = await api.get(
-        `repos/${this.state.repositoryInput}`
+      const searchName =
+        typeof repositoryName === 'undefined'
+          ? this.state.repositoryInput
+          : repositoryName
+
+      // Find repository
+      const { data: repository } = await api.get(`repos/${searchName}`)
+
+      const searchId = typeof id === 'undefined' ? repository.id : id
+
+      // add data custom with moment
+      repository.lastCommit = moment(repository.pushed_at).fromNow()
+
+      let repositories = await this.getLocalRepositories()
+
+      // check if repository exist in localstorage
+      let findRepository = repositories.filter(
+        repo => String(repo.id) === String(searchId)
       )
 
-      repository.lastCommit = moment(repository.pushed_at).fromNow()
+      if (findRepository.length === 1) {
+        repositories.map(repo => {
+          if (String(repo.id) === String(searchId)) {
+            repo.stargazers_count = repository.stargazers_count
+            repo.forks_count = repository.forks_count
+            repo.open_issues_count = repository.open_issues_count
+            repo.lastCommit = repository.lastCommit
+          }
+
+          return repo
+        })
+      } else {
+        // Update with data if not exist repository in localstorage
+        repositories = [...this.state.repositories, repository]
+      }
 
       this.setState({
         repositoryInput: '',
         repositoryError: false,
-        repositories: [...this.state.repositories, repository]
+        repositories: repositories
       })
 
-      localStorage.setItem(
-        '@GithubCompare:Repositories',
-        JSON.stringify(this.state.repositories)
-      )
+      await this.setLocalRepositories()
     } catch (error) {
       this.setState({
         repositoryError: true,
@@ -101,6 +100,22 @@ export default class Main extends Component {
     } finally {
       this.setState({ loading: false })
     }
+  }
+
+  handleAddRepository = async e => {
+    e.preventDefault()
+    this.getRepository()
+  }
+
+  handlerRemoveRepository = async id => {
+    let { repositories } = this.sate
+    const updateRepositories = repositories.filter(
+      repository => String(repository.id) !== String(id)
+    )
+
+    this.setState({ repositories: updateRepositories })
+
+    await this.setLocalRepositories()
   }
 
   render () {
@@ -129,7 +144,10 @@ export default class Main extends Component {
 
         <CompareList
           repositories={this.state.repositories}
-          onBigButtonClick={this.onHandleRefresh}
+          onRefreshClick={e =>
+            this.getRepository(e.target.dataset.id, e.target.dataset.repository)
+          }
+          onRemoveClick={e => this.handlerRemoveRepository(e.target.dataset.id)}
         />
       </Container>
     )

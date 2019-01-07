@@ -1,36 +1,28 @@
 import React from 'react'
-import moment from 'moment'
 import PropTypes from 'prop-types'
 
-import api from '../../services/api'
 import { Container, Repository } from './styles'
 
-const CompareList = props => {
-  const handleRefreshRepository = async e => {
-    props.onBigButtonClick(e)
-  }
-
-  const handleRemoveRepository = e => {
-    console.log(e.target.dataset.id)
-    console.log(e.target.dataset.repository)
-  }
-
+const CompareList = ({ repositories, onRefreshClick, onRemoveClick }) => {
   return (
     <Container>
-      {props.repositories.map(repository => (
+      {repositories.map(repository => (
         <Repository key={repository.id}>
           <header>
             <div className="optionsRepository">
               <i
                 className="fa fa-refresh"
+                data-action="refresh"
                 data-id={repository.id}
                 data-repository={`${repository.owner.login}/${repository.name}`}
-                onClick={handleRefreshRepository}
+                onClick={e => onRefreshClick(e)}
               />
               <i
                 className="fa fa-trash-o"
+                data-action="remove"
                 data-id={repository.id}
                 data-repository={`${repository.owner.login}/${repository.name}`}
+                onClick={e => onRemoveClick(e)}
               />
             </div>
             <img

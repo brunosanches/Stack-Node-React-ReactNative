@@ -1,8 +1,16 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
+import GlobalStyle from './assets/stylesheets/global'
+
+import Main from './pages/main'
 
 class App extends Component {
   render () {
-    return <h1>React Map GL Uber</h1>
+    return (
+      <Fragment>
+        <GlobalStyle />
+        <Main />
+      </Fragment>
+    )
   }
 }
 

@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -12,6 +12,13 @@ const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased !important;
     font-family: sans-serif;
   }
+`
+
+export const ImgMarker = styled.img`
+  border-radius: 50%;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
 `
 
 export default GlobalStyle

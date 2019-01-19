@@ -1,4 +1,6 @@
 import React from 'react'
+import { connect } from 'react-redux'
+
 import { ImgMarker } from '../../assets/stylesheets/global'
 import { List } from './styles'
 
@@ -12,4 +14,8 @@ const ListUser = ({ users, localizeMarker }) => (
   </List>
 )
 
-export default ListUser
+const mapStateToProps = state => ({
+  users: state.users.data
+})
+
+export default connect(mapStateToProps)(ListUser)

@@ -1,15 +1,20 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
+import { Provider } from 'react-redux'
+
 import GlobalStyle from './assets/stylesheets/global'
+
+import './config/reactotron'
+import store from './store'
 
 import Main from './pages/main'
 
 class App extends Component {
   render () {
     return (
-      <Fragment>
+      <Provider store={store}>
         <GlobalStyle />
         <Main />
-      </Fragment>
+      </Provider>
     )
   }
 }

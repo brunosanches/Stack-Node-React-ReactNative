@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import { connect } from 'react-redux'
 import { Marker } from 'react-map-gl'
 
 import { ImgMarker } from '../../assets/stylesheets/global'
@@ -20,4 +21,8 @@ const MarkerMap = ({ users }) => (
   </Fragment>
 )
 
-export default MarkerMap
+const mapStateToProps = state => ({
+  users: state.users.data
+})
+
+export default connect(mapStateToProps)(MarkerMap)

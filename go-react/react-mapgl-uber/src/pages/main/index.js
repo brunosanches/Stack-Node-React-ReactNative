@@ -1,27 +1,25 @@
 import React, { Component, Fragment } from 'react'
 import MapGL from 'react-map-gl'
 
-import api from '../../services/api'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import { Creators as UsersActions } from '../../store/ducks/users'
+
 import MarkerMap from '../../components/markerMap'
 import ListUser from '../../components/users/list'
 import AddUser from '../../components/users/add'
 
-export default class Main extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        latitude: -23.5439948,
-        longitude: -46.6065452,
-        zoom: 14
-      },
-      isShowMarker: false,
-      userInput: '',
-      user: {},
-      users: []
-    }
+class Main extends Component {
+  state = {
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      latitude: -23.5439948,
+      longitude: -46.6065452,
+      zoom: 14
+    },
+    isShowMarker: false,
+    user: {}
   }
 
   componentDidMount () {
@@ -49,24 +47,16 @@ export default class Main extends Component {
     this.setState({ isShowMarker: true, user: { latitude, longitude } })
   }
 
-  handleSaveMarker = async userInput => {
-    const { data } = await api.get(`/users/${userInput}`)
-
-    const latitude = this.state.user.latitude
-    const longitude = this.state.user.longitude
-
+  handleSaveMarker = async username => {
     const user = {
-      id: Math.random(),
-      latitude,
-      longitude,
-      image: data.avatar_url
+      username,
+      latitude: this.state.user.latitude,
+      longitude: this.state.user.longitude
     }
 
-    this.setState({
-      users: [...this.state.users, user],
-      user: '',
-      isShowMarker: false
-    })
+    this.props.addRequest(user)
+
+    this.setState({ user: '', isShowMarker: false })
   }
 
   handleCloseMarker = () => {
@@ -84,10 +74,10 @@ export default class Main extends Component {
   }
 
   render () {
-    const { viewport, users } = this.state
+    const { viewport } = this.state
     return (
       <Fragment>
-        <ListUser users={users} localizeMarker={this.handleLocalizeMarker} />
+        <ListUser localizeMarker={this.handleLocalizeMarker} />
         {this.state.isShowMarker ? (
           <AddUser
             closeMarker={this.handleCloseMarker}
@@ -103,9 +93,21 @@ export default class Main extends Component {
           }
           onViewportChange={viewport => this.setState({ viewport })}
         >
-          <MarkerMap users={users} />
+          <MarkerMap />
         </MapGL>
       </Fragment>
     )
   }
 }
+
+const mapStateToProps = state => ({
+  users: state.users
+})
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(UsersActions, dispatch)
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main)
